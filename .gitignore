@@ -64,3 +64,5 @@ temp/
 
 # Docker volumes
 docker-data/
+
+.claude
