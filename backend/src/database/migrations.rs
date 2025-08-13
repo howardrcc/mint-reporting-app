@@ -103,7 +103,7 @@ fn get_migrations() -> Vec<(i32, Migration)> {
                     refresh_interval INTEGER,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (data_source_id) REFERENCES data_sources(id) ON DELETE SET NULL
+                    FOREIGN KEY (data_source_id) REFERENCES data_sources(id)
                 );
             ",
         }),
@@ -118,7 +118,7 @@ fn get_migrations() -> Vec<(i32, Migration)> {
                     data_source_id VARCHAR,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     expires_at TIMESTAMP,
-                    FOREIGN KEY (data_source_id) REFERENCES data_sources(id) ON DELETE CASCADE
+                    FOREIGN KEY (data_source_id) REFERENCES data_sources(id)
                 );
                 CREATE INDEX idx_query_cache_hash ON query_cache(query_hash);
                 CREATE INDEX idx_query_cache_expires ON query_cache(expires_at);
@@ -134,7 +134,7 @@ fn get_migrations() -> Vec<(i32, Migration)> {
                     metric_value DOUBLE,
                     metadata JSON,
                     calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (data_source_id) REFERENCES data_sources(id) ON DELETE CASCADE
+                    FOREIGN KEY (data_source_id) REFERENCES data_sources(id)
                 );
                 CREATE INDEX idx_analytics_metrics_source ON analytics_metrics(data_source_id);
                 CREATE INDEX idx_analytics_metrics_name ON analytics_metrics(metric_name);

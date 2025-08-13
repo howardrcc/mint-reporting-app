@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.tauri.app/config/2.0",
+  "identifier": "file-access",
+  "description": "File system access capabilities for data import/export",
+  "windows": ["main"],
+  "permissions": [
+    "fs:allow-read-file",
+    "fs:allow-write-file", 
+    "fs:allow-read-dir",
+    "fs:allow-create",
+    "fs:allow-remove",
+    "fs:scope-app-data-recursive",
+    "fs:scope-home-recursive",
+    "dialog:allow-open",
+    "dialog:allow-save"
+  ]
+}

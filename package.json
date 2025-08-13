@@ -24,7 +24,7 @@
     "clean": "rm -rf node_modules */node_modules backend/target desktop/src-tauri/target web-frontend/dist"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^9.0.0"
   },
   "workspaces": [
     "web-frontend",

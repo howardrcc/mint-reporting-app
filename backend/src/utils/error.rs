@@ -17,6 +17,12 @@ pub enum AppError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     
+    #[error("Anyhow error: {0}")]
+    Anyhow(#[from] anyhow::Error),
+    
+    #[error("CSV error: {0}")]
+    Csv(#[from] csv::Error),
+    
     #[error("Validation error: {0}")]
     Validation(String),
     
@@ -64,6 +70,14 @@ impl IntoResponse for AppError {
             AppError::Io(ref e) => {
                 tracing::error!("IO error: {:?}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, "IO_ERROR", self.to_string())
+            }
+            AppError::Anyhow(ref e) => {
+                tracing::error!("Anyhow error: {:?}", e);
+                (StatusCode::INTERNAL_SERVER_ERROR, "ANYHOW_ERROR", self.to_string())
+            }
+            AppError::Csv(ref e) => {
+                tracing::error!("CSV error: {:?}", e);
+                (StatusCode::INTERNAL_SERVER_ERROR, "CSV_ERROR", self.to_string())
             }
             AppError::Validation(ref msg) => {
                 tracing::warn!("Validation error: {}", msg);

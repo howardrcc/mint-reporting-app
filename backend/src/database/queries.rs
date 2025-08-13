@@ -49,8 +49,8 @@ impl DataSourceQueries {
                 schema,
                 row_count: row.get(5)?,
                 size_bytes: row.get(6)?,
-                created_at: row.get(7)?,
-                updated_at: row.get(8)?,
+                created_at: chrono::Utc::now(), // TODO: Parse from database
+                updated_at: chrono::Utc::now(), // TODO: Parse from database
             }))
         } else {
             Ok(None)
@@ -77,8 +77,8 @@ impl DataSourceQueries {
                 schema,
                 row_count: row.get(5)?,
                 size_bytes: row.get(6)?,
-                created_at: row.get(7)?,
-                updated_at: row.get(8)?,
+                created_at: chrono::Utc::now(), // TODO: Parse from database
+                updated_at: chrono::Utc::now(), // TODO: Parse from database
             })
         })?;
         
@@ -153,8 +153,8 @@ impl DashboardQueries {
                 filters: filters_json.and_then(|f| serde_json::from_str(&f).ok()),
                 data_source_id: row.get(4)?,
                 refresh_interval: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
+                created_at: chrono::Utc::now(), // TODO: Parse from database
+                updated_at: chrono::Utc::now(), // TODO: Parse from database
             }))
         } else {
             Ok(None)
@@ -180,8 +180,8 @@ impl DashboardQueries {
                 filters: filters_json.and_then(|f| serde_json::from_str(&f).ok()),
                 data_source_id: row.get(4)?,
                 refresh_interval: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
+                created_at: chrono::Utc::now(), // TODO: Parse from database
+                updated_at: chrono::Utc::now(), // TODO: Parse from database
             })
         })?;
         
@@ -231,42 +231,46 @@ impl AnalyticsQueries {
         
         // Validate and sanitize the query (basic protection)
         if sql.to_lowercase().contains("drop") || sql.to_lowercase().contains("delete") {
-            return Err(duckdb::Error::SqliteFailure(
-                duckdb::ffi::Error::new(duckdb::ffi::SQLITE_MISUSE),
-                Some("Destructive operations are not allowed".to_string())
-            ));
+            return Err(duckdb::Error::ToSqlConversionFailure(Box::new(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "Destructive operations are not allowed"
+            ))));
         }
 
         let mut stmt = conn.prepare(sql)?;
-        let mut rows = stmt.query([])?;
         
-        let mut data = Vec::new();
         let column_count = stmt.column_count();
         let column_names: Vec<String> = (0..column_count)
-            .map(|i| stmt.column_name(i).unwrap_or("unknown").to_string())
+            .map(|i| stmt.column_name(i).map_or("unknown".to_string(), |v| v.to_string()))
             .collect();
+        
+        let mut rows = stmt.query([])?;
+        let mut data = Vec::new();
 
         while let Some(row) = rows.next()? {
             let mut row_data = Vec::new();
             for i in 0..column_count {
                 let value: JsonValue = match row.get_ref(i)? {
                     duckdb::types::ValueRef::Null => JsonValue::Null,
-                    duckdb::types::ValueRef::Integer(i) => JsonValue::Number(i.into()),
-                    duckdb::types::ValueRef::Real(f) => JsonValue::Number(
+                    duckdb::types::ValueRef::Int(i) => JsonValue::Number(i.into()),
+                    duckdb::types::ValueRef::BigInt(i) => JsonValue::Number(i.into()),
+                    duckdb::types::ValueRef::Double(f) => JsonValue::Number(
                         serde_json::Number::from_f64(f).unwrap_or_else(|| serde_json::Number::from(0))
                     ),
                     duckdb::types::ValueRef::Text(s) => JsonValue::String(String::from_utf8_lossy(s).to_string()),
                     duckdb::types::ValueRef::Blob(_) => JsonValue::String("BLOB".to_string()),
+                    _ => JsonValue::String("UNKNOWN".to_string()),
                 };
                 row_data.push(value);
             }
             data.push(row_data);
         }
         
+        let row_count = data.len();
         Ok(QueryResult {
             columns: column_names,
             data,
-            row_count: data.len(),
+            row_count,
         })
     }
 

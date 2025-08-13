@@ -11,13 +11,9 @@ use crate::{
     models::{DataSource, DataPreviewRequest, DataPreviewResponse},
     services::file_processor::FileProcessor,
     utils::error::{AppError, AppResult},
+    AppState,
 };
 
-#[derive(Clone)]
-pub struct AppState {
-    pub db_pool: DatabasePool,
-    pub file_processor: FileProcessor,
-}
 
 /// Upload a data file
 pub async fn upload_data(
@@ -172,12 +168,13 @@ pub async fn preview_data(
 
     // Execute query
     let mut stmt = conn_guard.prepare(&query)?;
-    let mut rows = stmt.query([])?;
     
     let column_count = stmt.column_count();
     let columns: Vec<String> = (0..column_count)
-        .map(|i| stmt.column_name(i).unwrap_or("unknown").to_string())
+        .map(|i| stmt.column_name(i).map_or("unknown".to_string(), |v| v.to_string()))
         .collect();
+    
+    let mut rows = stmt.query([])?;
 
     let mut data = Vec::new();
     while let Some(row) = rows.next()? {
@@ -185,12 +182,14 @@ pub async fn preview_data(
         for i in 0..column_count {
             let value = match row.get_ref(i)? {
                 duckdb::types::ValueRef::Null => serde_json::Value::Null,
-                duckdb::types::ValueRef::Integer(n) => serde_json::Value::Number(n.into()),
-                duckdb::types::ValueRef::Real(f) => serde_json::Value::Number(
+                duckdb::types::ValueRef::Int(n) => serde_json::Value::Number(n.into()),
+                duckdb::types::ValueRef::BigInt(n) => serde_json::Value::Number(n.into()),
+                duckdb::types::ValueRef::Double(f) => serde_json::Value::Number(
                     serde_json::Number::from_f64(f).unwrap_or_else(|| serde_json::Number::from(0))
                 ),
                 duckdb::types::ValueRef::Text(s) => serde_json::Value::String(String::from_utf8_lossy(s).to_string()),
                 duckdb::types::ValueRef::Blob(_) => serde_json::Value::String("BLOB".to_string()),
+                _ => serde_json::Value::String("UNKNOWN".to_string()),
             };
             row_data.push(value);
         }

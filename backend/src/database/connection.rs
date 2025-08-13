@@ -80,7 +80,7 @@ impl ConnectionManager {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DatabaseInfo {
     pub version: String,
     pub memory_usage: i64,

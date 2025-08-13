@@ -3,7 +3,7 @@ use tracing::{debug, info};
 
 use crate::{
     database::queries::AnalyticsQueries,
-    handlers::data::AppState,
+    AppState,
     models::{QueryRequest, QueryResult, AggregationRequest, AggregationResult, ExportRequest, ExportResult, MetricsRequest, MetricsResult},
     utils::error::AppResult,
 };

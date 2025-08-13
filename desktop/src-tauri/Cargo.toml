@@ -22,8 +22,9 @@ tauri-plugin-notification = "2.0"
 tauri-plugin-updater = "2.0"
 tauri-plugin-autostart = "2.0"
 
-# Shared backend (reuse the backend we built)
-duckdb-dashboard-backend = { path = "../../backend" }
+# Shared backend dependencies (inline instead of circular dependency)
+duckdb = { version = "1.0", features = ["bundled"] }
+axum = { version = "0.7", features = ["ws", "multipart"] }
 
 # Core dependencies
 serde = { version = "1.0", features = ["derive"] }

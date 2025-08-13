@@ -31,12 +31,13 @@ impl DuckDBService {
         // For now, we'll ignore params as DuckDB parameter binding is complex
         // In a production implementation, you'd properly sanitize and bind parameters
         let mut stmt = conn_guard.prepare(sql)?;
-        let mut rows = stmt.query([])?;
 
         let column_count = stmt.column_count();
         let columns: Vec<String> = (0..column_count)
-            .map(|i| stmt.column_name(i).unwrap_or("unknown").to_string())
+            .map(|i| stmt.column_name(i).map_or("unknown".to_string(), |v| v.to_string()))
             .collect();
+
+        let mut rows = stmt.query([])?;
 
         let mut data = Vec::new();
         while let Some(row) = rows.next()? {
@@ -44,12 +45,14 @@ impl DuckDBService {
             for i in 0..column_count {
                 let value = match row.get_ref(i)? {
                     duckdb::types::ValueRef::Null => serde_json::Value::Null,
-                    duckdb::types::ValueRef::Integer(n) => serde_json::Value::Number(n.into()),
-                    duckdb::types::ValueRef::Real(f) => serde_json::Value::Number(
+                    duckdb::types::ValueRef::Int(n) => serde_json::Value::Number(n.into()),
+                    duckdb::types::ValueRef::BigInt(n) => serde_json::Value::Number(n.into()),
+                    duckdb::types::ValueRef::Double(f) => serde_json::Value::Number(
                         serde_json::Number::from_f64(f).unwrap_or_else(|| serde_json::Number::from(0))
                     ),
                     duckdb::types::ValueRef::Text(s) => serde_json::Value::String(String::from_utf8_lossy(s).to_string()),
                     duckdb::types::ValueRef::Blob(_) => serde_json::Value::String("BLOB".to_string()),
+                    _ => serde_json::Value::String("UNKNOWN".to_string()),
                 };
                 row_data.push(value);
             }
@@ -167,7 +170,8 @@ impl DuckDBService {
         column_name: &str,
         index_name: Option<&str>,
     ) -> AppResult<()> {
-        let index_name = index_name.unwrap_or(&format!("idx_{}_{}", table_name, column_name));
+        let default_index_name = format!("idx_{}_{}", table_name, column_name);
+        let index_name = index_name.unwrap_or(&default_index_name);
         
         info!("Creating index {} on {}.{}", index_name, table_name, column_name);
 

@@ -3,7 +3,7 @@ use tracing::{debug, info};
 
 use crate::{
     database::queries::DashboardQueries,
-    handlers::data::AppState,
+    AppState,
     models::{DashboardConfig, CreateDashboardRequest, UpdateDashboardRequest},
     utils::error::{AppError, AppResult},
 };

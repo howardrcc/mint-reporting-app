@@ -8,7 +8,8 @@ use std::collections::HashMap;
 use tokio::sync::broadcast;
 use tracing::{debug, error, info, warn};
 
-use crate::{handlers::data::AppState, utils::error::AppResult};
+use crate::{
+    AppState, utils::error::AppResult};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -241,12 +242,13 @@ async fn execute_websocket_query(
     }
     
     let mut stmt = conn_guard.prepare(sql)?;
-    let mut rows = stmt.query([])?;
     
     let column_count = stmt.column_count();
     let columns: Vec<String> = (0..column_count)
-        .map(|i| stmt.column_name(i).unwrap_or("unknown").to_string())
+        .map(|i| stmt.column_name(i).map_or("unknown".to_string(), |v| v.to_string()))
         .collect();
+    
+    let mut rows = stmt.query([])?;
     
     let mut data = Vec::new();
     
@@ -256,12 +258,14 @@ async fn execute_websocket_query(
         for (i, column_name) in columns.iter().enumerate() {
             let value = match row.get_ref(i)? {
                 duckdb::types::ValueRef::Null => serde_json::Value::Null,
-                duckdb::types::ValueRef::Integer(n) => serde_json::Value::Number(n.into()),
-                duckdb::types::ValueRef::Real(f) => serde_json::Value::Number(
+                duckdb::types::ValueRef::Int(n) => serde_json::Value::Number(n.into()),
+                duckdb::types::ValueRef::BigInt(n) => serde_json::Value::Number(n.into()),
+                duckdb::types::ValueRef::Double(f) => serde_json::Value::Number(
                     serde_json::Number::from_f64(f).unwrap_or_else(|| serde_json::Number::from(0))
                 ),
                 duckdb::types::ValueRef::Text(s) => serde_json::Value::String(String::from_utf8_lossy(s).to_string()),
                 duckdb::types::ValueRef::Blob(_) => serde_json::Value::String("BLOB".to_string()),
+                _ => serde_json::Value::String("UNKNOWN".to_string()),
             };
             
             row_obj.insert(column_name.clone(), value);

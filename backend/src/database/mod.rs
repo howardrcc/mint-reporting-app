@@ -29,6 +29,7 @@ pub fn create_connection(database_path: &str) -> DuckResult<DatabaseConnection> 
 }
 
 /// Get a thread-safe database connection pool
+#[derive(Clone)]
 pub struct DatabasePool {
     connection: DatabaseConnection,
 }

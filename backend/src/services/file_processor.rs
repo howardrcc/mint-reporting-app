@@ -107,13 +107,14 @@ impl FileProcessor {
         conn_guard.execute(&create_table_sql, [])?;
 
         // Insert data using DuckDB's CSV reading capabilities
-        // First, save the CSV data to a temporary location that DuckDB can read
-        let temp_file_path = format!("/tmp/{}", file_name);
+        // Create a temporary file for DuckDB to read
+        let temp_dir = std::env::temp_dir();
+        let temp_file_path = temp_dir.join(&file_name);
         std::fs::write(&temp_file_path, &file_data)?;
 
         let copy_sql = format!(
-            "COPY {} FROM '{}' (FORMAT CSV, HEADER)",
-            table_name, temp_file_path
+            "COPY {} FROM '{}' (FORMAT CSV, HEADER true)",
+            table_name, temp_file_path.to_string_lossy()
         );
 
         debug!("Loading CSV data with SQL: {}", copy_sql);
@@ -121,7 +122,7 @@ impl FileProcessor {
 
         // Clean up temp file
         if let Err(e) = std::fs::remove_file(&temp_file_path) {
-            error!("Failed to remove temp file {}: {}", temp_file_path, e);
+            error!("Failed to remove temp file {}: {}", temp_file_path.display(), e);
         }
 
         drop(conn_guard);
@@ -191,12 +192,13 @@ impl FileProcessor {
                         conn_guard.execute(&create_table_sql, [])?;
 
                         // Use DuckDB's JSON reading capabilities
-                        let temp_file_path = format!("/tmp/{}", file_name);
+                        let temp_dir = std::env::temp_dir();
+                        let temp_file_path = temp_dir.join(&file_name);
                         std::fs::write(&temp_file_path, &file_data)?;
 
                         let copy_sql = format!(
                             "INSERT INTO {} SELECT * FROM read_json_auto('{}')",
-                            table_name, temp_file_path
+                            table_name, temp_file_path.to_string_lossy()
                         );
 
                         debug!("Loading JSON data with SQL: {}", copy_sql);
@@ -204,7 +206,7 @@ impl FileProcessor {
 
                         // Clean up temp file
                         if let Err(e) = std::fs::remove_file(&temp_file_path) {
-                            error!("Failed to remove temp file {}: {}", temp_file_path, e);
+                            error!("Failed to remove temp file {}: {}", temp_file_path.display(), e);
                         }
 
                         row_count = array.len();
@@ -247,13 +249,14 @@ impl FileProcessor {
         let conn_guard = conn.lock().await;
 
         // Save parquet file temporarily
-        let temp_file_path = format!("/tmp/{}", file_name);
+        let temp_dir = std::env::temp_dir();
+        let temp_file_path = temp_dir.join(&file_name);
         std::fs::write(&temp_file_path, &file_data)?;
 
         // Use DuckDB's built-in Parquet support
         let create_table_sql = format!(
             "CREATE TABLE {} AS SELECT * FROM read_parquet('{}')",
-            table_name, temp_file_path
+            table_name, temp_file_path.to_string_lossy()
         );
 
         debug!("Creating table from Parquet with SQL: {}", create_table_sql);
@@ -277,7 +280,7 @@ impl FileProcessor {
 
         // Clean up temp file
         if let Err(e) = std::fs::remove_file(&temp_file_path) {
-            error!("Failed to remove temp file {}: {}", temp_file_path, e);
+            error!("Failed to remove temp file {}: {}", temp_file_path.display(), e);
         }
 
         drop(conn_guard);

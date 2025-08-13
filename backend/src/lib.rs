@@ -7,29 +7,32 @@ pub mod utils;
 
 use axum::{
     extract::DefaultBodyLimit,
-    http::Method,
     routing::{delete, get, post, put},
     Router,
 };
 use tower::ServiceBuilder;
 use tower_http::{
     compression::CompressionLayer,
-    cors::{Any, CorsLayer},
     trace::TraceLayer,
 };
 
 use crate::{
     handlers::{dashboard, data, analytics, websocket, system},
-    middleware::logging,
+    middleware::cors::create_cors_layer,
+    database::DatabasePool,
+    services::file_processor::FileProcessor,
 };
 
+#[derive(Clone)]
+pub struct AppState {
+    pub db_pool: DatabasePool,
+    pub file_processor: FileProcessor,
+}
+
 /// Create the main application router with all routes and middleware
-pub fn create_app() -> Router {
+pub fn create_app() -> Router<AppState> {
     // Configure CORS
-    let cors = CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
-        .allow_headers(Any)
-        .allow_origin(Any);
+    let cors = create_cors_layer();
 
     // Build the router with all routes
     Router::new()

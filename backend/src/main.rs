@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use clap::Parser;
-use duckdb_dashboard_backend::{create_app, database, utils::config::Config};
+use duckdb_dashboard_backend::{create_app, database, utils::config::Config, AppState};
 use tracing::{info, warn};
 
 #[derive(Parser)]
@@ -43,8 +43,18 @@ async fn main() -> anyhow::Result<()> {
     database::init(&cli.database_path).await?;
     info!("Database initialized at: {}", cli.database_path);
 
+    // Create database pool and file processor
+    let db_pool = database::DatabasePool::new(&cli.database_path)?;
+    let file_processor = duckdb_dashboard_backend::services::file_processor::FileProcessor::new(db_pool.clone());
+    
+    // Create application state
+    let state = AppState {
+        db_pool,
+        file_processor,
+    };
+
     // Create the application
-    let app = create_app();
+    let app = create_app().with_state(state);
 
     // Bind to address
     let addr = SocketAddr::new(

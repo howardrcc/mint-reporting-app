@@ -154,7 +154,7 @@ impl AnalyticsService {
                            ABS(({0} - stats.mean) / stats.std_dev) as z_score
                     FROM {1}
                     CROSS JOIN stats
-                    WHERE ABS(({0} - stats.mean) / stats.std_dev) > {}",
+                    WHERE ABS(({0} - stats.mean) / stats.std_dev) > {2}",
                     column_name, table_name, z_threshold
                 )
             },
