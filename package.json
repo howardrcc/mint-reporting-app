@@ -1,0 +1,51 @@
+{
+  "name": "duckdb-dashboard",
+  "version": "1.0.0",
+  "description": "Multi-platform data dashboard application with DuckDB",
+  "scripts": {
+    "dev:web": "concurrently \"npm run backend:web\" \"cd web-frontend && npm run dev\"",
+    "dev:frontend": "cd web-frontend && npm run dev",
+    "dev:desktop": "cd desktop && npm run tauri dev",
+    "backend:web": "cd backend && cargo run",
+    "build:web": "cd web-frontend && npm run build && cd ../backend && cargo build --release",
+    "build:desktop": "cd desktop && npm run tauri build",
+    "build:docker": "docker-compose build",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd web-frontend && npm run test",
+    "test:backend": "cd backend && cargo test",
+    "test:e2e": "cd web-frontend && npm run test:e2e",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd web-frontend && npm run lint",
+    "lint:backend": "cd backend && cargo clippy",
+    "format": "npm run format:frontend && npm run format:backend",
+    "format:frontend": "cd web-frontend && npm run format",
+    "format:backend": "cd backend && cargo fmt",
+    "install:all": "npm install && cd web-frontend && npm install && cd ../desktop && npm install",
+    "clean": "rm -rf node_modules */node_modules backend/target desktop/src-tauri/target web-frontend/dist"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "web-frontend",
+    "desktop"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/duckdb-dashboard.git"
+  },
+  "keywords": [
+    "duckdb",
+    "dashboard",
+    "analytics",
+    "react",
+    "rust",
+    "tauri",
+    "data-visualization"
+  ],
+  "license": "MIT"
+}
