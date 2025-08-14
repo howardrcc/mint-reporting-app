@@ -14,12 +14,13 @@ tauri-build = { version = "2.0", features = [] }
 
 [dependencies]
 # Tauri dependencies
-tauri = { version = "2.0", features = ["api-all"] }
+tauri = { version = "2.0", features = ["macos-private-api"] }
+
+# Tauri plugins
 tauri-plugin-window-state = "2.0"
 tauri-plugin-fs = "2.0"
 tauri-plugin-dialog = "2.0"
 tauri-plugin-notification = "2.0"
-tauri-plugin-updater = "2.0"
 tauri-plugin-autostart = "2.0"
 
 # Shared backend dependencies (inline instead of circular dependency)

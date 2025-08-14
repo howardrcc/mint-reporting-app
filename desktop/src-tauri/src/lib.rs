@@ -76,9 +76,9 @@ impl DesktopConfig {
 
 pub mod desktop_api {
     use super::*;
-    use tauri::{command, State};
-    use std::sync::Arc;
-    use tokio::sync::Mutex;
+    use tauri::command;
+    
+    
     
     #[command]
     pub async fn get_desktop_config() -> Result<DesktopConfig, String> {

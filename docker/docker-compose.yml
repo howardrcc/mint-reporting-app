@@ -3,8 +3,8 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ../backend
-      dockerfile: ../docker/web.Dockerfile
+      context: ..
+      dockerfile: docker/web.Dockerfile
     environment:
       - RUST_ENV=production
       - DATABASE_PATH=/data/app.db
@@ -26,8 +26,8 @@ services:
 
   frontend:
     build:
-      context: ../web-frontend
-      dockerfile: ../docker/nginx.Dockerfile
+      context: ..
+      dockerfile: docker/nginx.Dockerfile
     ports:
       - "8080:80"
     depends_on:

@@ -30,48 +30,17 @@
     "security": {
       "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: http: https:;"
     },
-    "macOSPrivateApi": false
+    "macOSPrivateApi": true
   },
   "bundle": {
     "active": true,
     "targets": "all",
-    "identifier": "com.duckdb.dashboard",
     "publisher": "DuckDB Dashboard Team",
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ],
+    "icon": [],
     "category": "Developer Tool",
     "shortDescription": "High-performance data dashboard with DuckDB",
     "longDescription": "A powerful data analytics dashboard application that leverages DuckDB for high-performance analytics on large datasets. Features interactive visualizations, real-time data processing, and multi-format data ingestion.",
     "copyright": "Copyright © 2024 DuckDB Dashboard Team",
     "licenseFile": "../LICENSE"
-  },
-  "plugins": {
-    "window-state": {
-      "filename": "window-state.json"
-    },
-    "fs": {
-      "all": true,
-      "scope": ["$APPDATA/duckdb-dashboard/**", "$HOME/.duckdb-dashboard/**"]
-    },
-    "dialog": {
-      "all": true
-    },
-    "notification": {
-      "all": true
-    },
-    "updater": {
-      "active": true,
-      "endpoints": ["https://api.github.com/repos/your-username/duckdb-dashboard/releases/latest"],
-      "dialog": true,
-      "pubkey": ""
-    },
-    "autostart": {
-      "all": true
-    }
   }
 }

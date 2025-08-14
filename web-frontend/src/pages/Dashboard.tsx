@@ -50,7 +50,6 @@ export default function Dashboard() {
 
   const renderWidget = (widget: DashboardWidget) => {
     const baseProps = {
-      key: widget.i,
       title: widget.config.title || `Widget ${widget.i}`,
       onEdit: () => console.log('Edit widget', widget.i),
       onDelete: () => console.log('Delete widget', widget.i),
@@ -59,13 +58,13 @@ export default function Dashboard() {
 
     switch (widget.type) {
       case 'metric':
-        return <MetricWidget {...baseProps} config={widget.config} />
+        return <MetricWidget key={widget.i} {...baseProps} config={widget.config} />
       case 'chart':
-        return <AGChartWidget {...baseProps} config={widget.config} />
+        return <AGChartWidget key={widget.i} {...baseProps} config={widget.config} />
       case 'grid':
-        return <AGGridWidget {...baseProps} config={widget.config} />
+        return <AGGridWidget key={widget.i} {...baseProps} config={widget.config} />
       case 'filter':
-        return <FilterWidget {...baseProps} config={widget.config} />
+        return <FilterWidget key={widget.i} {...baseProps} config={widget.config} />
       default:
         return <div key={widget.i} className="widget-content">Unknown widget type</div>
     }

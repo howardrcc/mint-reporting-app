@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
 import App from './App'
-import '../web-frontend/src/index.css'
+import './index.css'
 
 // Create a client
 const queryClient = new QueryClient({

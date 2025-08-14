@@ -27,7 +27,7 @@ A high-performance data dashboard application that leverages DuckDB for analytic
 npm install
 
 # Install Tauri CLI
-npm install -g @tauri-apps/cli@next
+npm install -g @tauri-apps/cli@latest
 
 # Start web development
 npm run dev:web
@@ -37,6 +37,12 @@ npm run dev:desktop
 
 # Start with Docker
 docker-compose up -dev
+
+cargo install zoxide --locked
+cd /Users/howard/workspace/experiment_1_mint_app/desktop/src-tauri && cargo build)
+cargo fix --lib -p duckdb-dashboard-desktop
+cargo build --manifest-path /Users/howard/workspace/experiment_1_mint_app/desktop/src-tauri/Cargo.toml
+
 ```
 
 ## Architecture
@@ -108,6 +114,8 @@ docker-compose up
 npm run build:desktop
 # Installers generated in desktop/src-tauri/target/release/bundle/
 ```
+
+
 
 ## License
 

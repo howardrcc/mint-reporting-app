@@ -76,8 +76,11 @@ struct Migration {
 fn get_migrations() -> Vec<(i32, Migration)> {
     vec![
         (1, Migration {
-            name: "Create data_sources table",
+            name: "Configure DuckDB and create data_sources table",
             sql: "
+                SET home_directory='/home/appuser';
+                INSTALL json;
+                LOAD json;
                 CREATE TABLE data_sources (
                     id VARCHAR PRIMARY KEY,
                     name VARCHAR NOT NULL,

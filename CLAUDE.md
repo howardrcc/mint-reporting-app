@@ -63,7 +63,8 @@ npm run test:e2e            # End-to-end tests
 
 ### Docker Development
 ```bash
-docker-compose up -dev      # Web stack with hot reload
+docker-compose up           # Start web stack (backend + frontend + redis)
+docker-compose up -d        # Start web stack in detached mode
 ```
 
 ## Key Components

@@ -1,5 +1,5 @@
 # Multi-stage build for Rust backend
-FROM rust:1.75-slim as builder
+FROM rust:1.82-slim as builder
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,15 +32,19 @@ RUN apt-get update && apt-get install -y \
     libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create app user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Create app user with home directory
+RUN groupadd -r appuser && useradd -r -g appuser -m -d /home/appuser appuser
 
 # Create directories
-RUN mkdir -p /app /data /uploads && \
-    chown -R appuser:appuser /app /data /uploads
+RUN mkdir -p /app /data /uploads /home/appuser/.duckdb && \
+    chown -R appuser:appuser /app /data /uploads /home/appuser
 
 # Copy the binary
 COPY --from=builder /app/target/release/web-server /app/
+
+# Set environment variables for DuckDB
+ENV HOME=/home/appuser
+ENV DUCKDB_HOME=/home/appuser/.duckdb
 
 # Change to app user
 USER appuser
